@@ -1,0 +1,27 @@
+---
+title: "wifl"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  github_document:
+    toc: true
+---
+
+## General Goals
+This is the WIFL metadata dataset that Winnie and I are using
+as an example to learn about R and github
+
+## Data
+
+The data for this project are all housed in the `./data` directory.  
+
+### Reading Data In
+
+```{r read-one-snppit}
+library(tidyverse)
+
+wifl <- read_csv ("data/WIFL_Metadata.csv")
+head(wifl)
+plot(wifl$Lat, wifl$Long)
+```
+
+
