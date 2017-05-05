@@ -29,9 +29,11 @@ wifl2 <- wifl%>%
 Relational Data
 ```{r}
 panel1 <- read_tsv("data/panel1_all_two_col.txt", col_names = T)
-View(panel1)
-wifl2 %>%
+panel2 <- read_tsv("data/panel2_all_two_col.txt", col_names = T)
+View(panel2)
+wiflp1 <- wifl2 %>%
   left_join(., panel1, by = c("Field_Number" = "Sample_ID"))
+View(wiflp1)
 ```
 
 
