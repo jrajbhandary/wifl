@@ -7,21 +7,31 @@ output:
 ---
 
 ## General Goals
-This is the WIFL metadata dataset that Winnie and I are using
-as an example to learn about R and github
-
-## Data
-
-The data for this project are all housed in the `./data` directory.  
+My goal is to use the WIFL database to learn more about different ways to analyze big datasets and to be able to use github for data reproducibility 
 
 ### Reading Data In
 
 ```{r read-one-snppit}
 library(tidyverse)
+library(readr)
 
 wifl <- read_csv ("data/WIFL_Metadata.csv")
-head(wifl)
-plot(wifl$Lat, wifl$Long)
+View(wifl)
+```
+Data Transformation
+```{r}
+eben <- filter(wifl, Collector == "Eben Paxton")
+arrange(wifl, Field_Number)
+wifl2 <- wifl%>%
+  select(Field_Number, Near_Town, Lat, Long, Stage)
+```
+
+Relational Data
+```{r}
+panel1 <- read_tsv("data/panel1_all_two_col.txt", col_names = T)
+View(panel1)
+wifl2 %>%
+  left_join(., panel1, by = c("Field_Number" = "Sample_ID"))
 ```
 
 
