@@ -70,8 +70,8 @@ map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 4] <- "Pas
 
 
 ggplot() +
-  #geom_osm(type = "hillshade")+
-  ggspatial::geom_spatial(data = map, mapping=aes(fill=Range, alpha = 0.2))+
+  geom_osm(type = "osm")+
+  ggspatial::geom_spatial(data = map, mapping=aes(fill=Range, alpha = 1))+
   geom_point(data = wiflnew,mapping=aes(x=Lon, y=Lat, color = Stage))+
   coord_map()
 
