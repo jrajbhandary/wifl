@@ -7,7 +7,7 @@ output:
 ---
 
 ## General Goals
-My goal is to use the WIFL database to learn more about different ways to analyze big datasets and to be able to use github for data reproducibility 
+My goal is to use the WIFL database to learn more about analyzing big datasets and to be able to use github for data reproducibility 
 
 ### Reading Data In
 
@@ -23,7 +23,7 @@ Data Transformation
 eben <- filter(wifl, Collector == "Eben Paxton")
 arrange(wifl, Field_Number)
 wifl2 <- wifl%>%
-  select(Field_Number, Near_Town, Lat, Long, Stage)
+  select(Field_Number, Near_Town, Lat, Lon, Stage, State)
 ```
 
 Relational Data
@@ -34,6 +34,19 @@ View(panel2)
 wiflp1 <- wifl2 %>%
   left_join(., panel1, by = c("Field_Number" = "Sample_ID"))
 View(wiflp1)
+
+wiflnew <- wifl2[which(!is.na(wifl2$Lat)),]
+View(wiflnew)
+dim(wiflp1)
+dim(wiflnew)
+
 ```
 
+```{r}
+library(ggmap)
+get_googlemap(center=c(mean(wiflnew$Lon), mean(wiflnew$Lat)), 
+              zoom=10) %>%
+  ggmap()+
+  geom_point(wiflnew, mapping=aes(Lon, Lat), color = "red")
+```
 
