@@ -44,9 +44,36 @@ dim(wiflnew)
 
 ```{r}
 library(ggmap)
-get_googlemap(center=c(mean(wiflnew$Lon), mean(wiflnew$Lat)), 
-              zoom=10) %>%
+range(wiflnew$Lon)
+range(wiflnew$Lat)
+get_googlemap(center=c(-90, 25),zoom=3) %>%
   ggmap()+
-  geom_point(wiflnew, mapping=aes(Lon, Lat), color = "red")
+  geom_point(wiflnew, mapping=aes(x=Lon, y=Lat, color = Stage))
+```
+
+```{r}
+install.packages(c("sp", "rgdal", "raster"))
+devtools::install_github("paleolimbot/ggspatial")
+library(tidyverse)
+library(rgdal)
+library(sp)
+library(ggspatial)
+
+dir("WIFL/")
+map <- rgdal::readOGR(dsn = "WIFL", layer = "WIFL")
+map@data
+
+map@data$Range <- "#FFFFFF"
+map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 2] <- "Breeding"
+map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 3] <- "Wintering"
+map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 4] <- "Passage Migrant"
+
+
+ggplot() +
+  #geom_osm(type = "hillshade")+
+  ggspatial::geom_spatial(data = map, mapping=aes(fill=Range, alpha = 0.2))+
+  geom_point(data = wiflnew,mapping=aes(x=Lon, y=Lat, color = Stage))+
+  coord_map()
+
 ```
 
