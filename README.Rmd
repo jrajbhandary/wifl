@@ -1,79 +1,68 @@
 ---
-title: "wifl"
+title: "Interactive maps"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: 
   github_document:
     toc: true
 ---
 
-## General Goals
-My goal is to use the WIFL database to learn more about analyzing big datasets and to be able to use github for data reproducibility 
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-### Reading Data In
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "readme-figs/"
+)
+```
+
+### Goal
+
+To create interactive maps of blood and feather samples for our target taxa for the Bird Genoscape Project website
+
+### Data
+
+The data for this project is housed in the `./data` directory. 
+
+### Loading all required packages
 
 ```{r read-one-snppit}
 library(tidyverse)
-library(readr)
-
-wifl <- read_csv ("data/WIFL_Metadata.csv")
-View(wifl)
-```
-Data Transformation
-```{r}
-eben <- filter(wifl, Collector == "Eben Paxton")
-arrange(wifl, Field_Number)
-wifl2 <- wifl%>%
-  select(Field_Number, Near_Town, Lat, Lon, Stage, State)
+library(sf)
+library(leaflet)
+library(mapview)
+library(ggplot2)
 ```
 
-Relational Data
-```{r}
-panel1 <- read_tsv("data/panel1_all_two_col.txt", col_names = T)
-panel2 <- read_tsv("data/panel2_all_two_col.txt", col_names = T)
-View(panel2)
-wiflp1 <- wifl2 %>%
-  left_join(., panel1, by = c("Field_Number" = "Sample_ID"))
-View(wiflp1)
+### Reading data in
 
-wiflnew <- wifl2[which(!is.na(wifl2$Lat)),]
-View(wiflnew)
-dim(wiflp1)
-dim(wiflnew)
+```{r read-all-snppit}
+COYE <- read_sf("data/COYE/COYE.shp")
+as_tibble(COYE)
+COYE$Range[(as.numeric(as.character(COYE$SEASONAL)) %% 10) == 2] <- "Breeding Resident"
+COYE$Range[(as.numeric(as.character(COYE$SEASONAL)) %% 10) == 1] <- "Permanent Resident"
+COYE$Range[(as.numeric(as.character(COYE$SEASONAL)) %% 10) == 5] <- "Wintering Resident"
+COYE$Range[(as.numeric(as.character(COYE$SEASONAL)) %% 10) == 4] <- "Passage Migrant"
 
+coyeblood <- read.csv("data/coye_blood.csv", header=T)
+Blood <- st_as_sf(coyeblood, 
+                  coords = c("Lon", "Lat"),
+                  crs = (4326))
+
+coyefeather <- read.csv("data/coye_feathers.csv", header=T)
+Feather <- st_as_sf(coyefeather, 
+                  coords = c("Lon", "Lat"),
+                  crs = (4326))
 ```
 
-```{r}
-library(ggmap)
-range(wiflnew$Lon)
-range(wiflnew$Lat)
-get_googlemap(center=c(-90, 25),zoom=3) %>%
-  ggmap()+
-  geom_point(wiflnew, mapping=aes(x=Lon, y=Lat, color = Stage))
+### Create interactive maps using mapview
+
+```{r meta-probs}
+COYEmap <- mapView(COYE, map.type = "Esri.WorldShadedRelief", zcol="Range", legend=T, alpha.regions = 1)+
+  mapView(Blood, map.type = "Esri.WorldShadedRelief", zcol="Stage", legend=T)+
+  mapView(Feather, map.type = "Esri.WorldShadedRelief", zcol="Stage", legend=T)
+
+COYEmap 
+
+mapshot(COYEmap, url = "COYE_map.html")
 ```
-
-```{r}
-install.packages(c("sp", "rgdal", "raster"))
-devtools::install_github("paleolimbot/ggspatial")
-library(tidyverse)
-library(rgdal)
-library(sp)
-library(ggspatial)
-
-dir("WIFL/")
-map <- rgdal::readOGR(dsn = "WIFL", layer = "WIFL")
-map@data
-
-map@data$Range <- "#FFFFFF"
-map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 2] <- "Breeding"
-map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 3] <- "Wintering"
-map@data$Range[(as.numeric(as.character(map@data$SEASONAL)) %% 10) == 4] <- "Passage Migrant"
-
-
-ggplot() +
-  geom_osm(type = "osm")+
-  ggspatial::geom_spatial(data = map, mapping=aes(fill=Range, alpha = 1))+
-  geom_point(data = wiflnew,mapping=aes(x=Lon, y=Lat, color = Stage))+
-  coord_map()
-
-```
-
