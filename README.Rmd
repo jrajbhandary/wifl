@@ -58,10 +58,9 @@ Feather <- st_as_sf(coyefeather,
 ### Create interactive maps using mapview
 
 ```{r meta-probs}
-COYEmap <- mapView(COYE, map.type = "Esri.WorldShadedRelief", zcol="Range", legend=T, alpha.regions = 1)+
-  mapView(Blood, map.type = "Esri.WorldShadedRelief", zcol="Stage", legend=T)+
-  mapView(Feather, map.type = "Esri.WorldShadedRelief", zcol="Stage", legend=T)
-
+COYEmap <- mapView(COYE, map.type = "Stamen.terrain", zcol="Range", legend=T, col.regions = c("darkorange", "gold", "darkorchid1", "dodgerblue1"))+
+  mapView(Blood, map.type = "Stamen.terrain", zcol="Stage", legend=T, col.regions = c("darkred", "seagreen", "navy"))+
+  mapView(Feather, map.type = "Stamen.terrain", zcol="Stage", legend=T, col.regions = c("darkred", "seagreen", "navy"))
 COYEmap 
 
 mapshot(COYEmap, url = "COYE_map.html")
